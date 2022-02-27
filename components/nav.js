@@ -1,56 +1,33 @@
-import React from 'react'
-import Link from 'next/link'
-
-const links = [
-  { href: 'https://zeit.co/now', label: 'ZEIT' },
-  { href: 'https://github.com/zeit/next.js', label: 'GitHub' },
-].map(link => {
-  link.key = `nav-link-${link.href}-${link.label}`
-  return link
-})
+import React from "react";
+import Link from "next/link";
 
 const Nav = () => (
-  <nav>
-    <ul>
-      <li>
+  <nav className="navbar my-navbar fixed-top">
+    <div className="container">
+      <div className="d-flex w-100">
         <Link href="/">
-          <a>Home</a>
+          <a className="nav-link active" aria-current="page" href="/">
+            Home
+          </a>
         </Link>
-      </li>
-      {links.map(({ key, href, label }) => (
-        <li key={key}>
-          <a href={href}>{label}</a>
-        </li>
-      ))}
-    </ul>
-
-    <style jsx>{`
-      :global(body) {
-        margin: 0;
-        font-family: -apple-system, BlinkMacSystemFont, Avenir Next, Avenir,
-          Helvetica, sans-serif;
-      }
-      nav {
-        text-align: center;
-      }
-      ul {
-        display: flex;
-        justify-content: space-between;
-      }
-      nav > ul {
-        padding: 4px 16px;
-      }
-      li {
-        display: flex;
-        padding: 6px 8px;
-      }
-      a {
-        color: #067df7;
-        text-decoration: none;
-        font-size: 13px;
-      }
-    `}</style>
+        <Link href="/profile">
+          <a className="nav-link" href="#">
+            Profile
+          </a>
+        </Link>
+        <Link href="/dashboard">
+          <a className="nav-link" href="#">
+            Dashboard
+          </a>
+        </Link>
+        <div className="flex-grow-1 text-end">
+          <a className="nav-link" href="#">
+            Login
+          </a>
+        </div>
+      </div>
+    </div>
   </nav>
-)
+);
 
-export default Nav
+export default Nav;

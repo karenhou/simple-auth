@@ -1,0 +1,36 @@
+@import "./variables";
+
+* {
+  margin: 0;
+  padding: 0;
+  font-family: "Work Sans", sans-serif;
+}
+
+.my-navbar {
+  background-color: $primaryColor;
+
+  .nav-link {
+    text-decoration: none;
+    color: white;
+
+    &.active {
+      color: white;
+    }
+
+    &:hover {
+      color: white;
+    }
+
+    &:focus {
+      color: white;
+    }
+
+    &:first-child {
+      padding-left: 0;
+    }
+  }
+}
+
+.mt-header {
+  margin-top: 56px;
+}
