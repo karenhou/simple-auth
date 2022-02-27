@@ -1,13 +1,8 @@
 // import App from 'next/app'
-import Layout from "../components/layout/layout";
 import "../styles/globale.scss";
 
 function MyApp({ Component, pageProps }) {
-  return (
-    <Layout>
-      <Component {...pageProps} />
-    </Layout>
-  );
+  return <Component {...pageProps} />;
 }
 
 // Only uncomment this method if you have blocking data requirements for
