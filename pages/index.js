@@ -7,9 +7,7 @@ const Home = () => {
 
   return (
     <Layout user={user} loading={loading}>
-      <button type="button" className="btn btn-primary">
-        Primary
-      </button>
+      <h2 className="pt-3">Home page nothing to see here</h2>
     </Layout>
   );
 };
