@@ -1,12 +1,12 @@
+import { useUser } from "@auth0/nextjs-auth0";
 import React from "react";
 import Layout from "../components/layout/layout";
-import { useFetchUser } from "../lib/user";
 
 const Home = () => {
-  const { user, loading } = useFetchUser();
+  const { user, error, isLoading } = useUser();
 
   return (
-    <Layout user={user} loading={loading}>
+    <Layout user={user} loading={isLoading}>
       <h2 className="pt-3">Home page nothing to see here</h2>
     </Layout>
   );
