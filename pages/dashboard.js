@@ -2,7 +2,9 @@
 import React, { useState, useEffect } from "react";
 import { Tabs, Tab, Table } from "react-bootstrap";
 import Layout from "../components/layout/layout";
-import { useFetchUser } from "../lib/user";
+import moment from "moment";
+import Router from "next/router";
+import { withPageAuthRequired, useUser } from "@auth0/nextjs-auth0";
 
 const checkPassword = (str) => {
   var re = /^(?=.*\d)(?=.*[!@#$%^&*])(?=.*[a-z])(?=.*[A-Z]).{8,}$/;
@@ -39,25 +41,17 @@ const ChangePassword = ({ user }) => {
       setErrorText("Confirm new password is not the same with new password");
     } else {
       try {
-        // auth0 allows to update the new password directly
-        // TODO, validate old password first then update the new password
-        const options = {
+        const result = await fetch("/api/changePassword", {
           method: "PATCH",
-          url: `https://kh-auth.us.auth0.com/api/v2/users/${user.sub}`,
-          headers: {
-            "content-type": "application/json",
-            authorization: `Bearer ${process.env.NEXT_PUBLIC_YOUR_MGMT_API_ACCESS_TOKEN}`,
-          },
-          data: {
+          body: JSON.stringify({
             password: newPW,
-            connection: "Username-Password-Authentication",
-          },
-        };
-        console.log("options ", options);
+          }),
+        });
 
-        const result = await axios.request(options);
-        console.log("update user ", result.data);
-        if (result.data) {
+        const parsed = await result.json();
+        console.log("update user pw", parsed);
+
+        if (parsed) {
           setIsLoading(false);
           setSubmitSuccess(true);
           setOldPW("");
@@ -65,6 +59,9 @@ const ChangePassword = ({ user }) => {
           setPasswordConfirm("");
           setInterval(() => {
             setSubmitSuccess(false);
+
+            //force user logout
+            Router.push("/api/auth/logout");
           }, 3000);
         }
       } catch (error) {
@@ -156,7 +153,7 @@ const ChangePassword = ({ user }) => {
 
           {submitSuccess && (
             <div className="text-primary text-center mt-3">
-              Change password successful !
+              Change password successful, auto logout in few seconds!
             </div>
           )}
         </form>
@@ -166,113 +163,154 @@ const ChangePassword = ({ user }) => {
 };
 
 const Dashboard = () => {
-  const { user, loading } = useFetchUser({ required: true });
+  const { user, error, isLoading } = useUser();
 
   const [massiveUserData, setMassiveUserData] = useState("");
   const [todayLogins, setTodayLogins] = useState("`");
+  const [msg, setMsg] = useState("");
 
   useEffect(() => {
-    (async () => {
-      const options = {
-        method: "GET",
-        url: "https://kh-auth.us.auth0.com/api/v2/users",
-        headers: {
-          authorization: `Bearer ${process.env.NEXT_PUBLIC_YOUR_MGMT_API_ACCESS_TOKEN}`,
-        },
-      };
-      console.log("options ", options);
+    //fetch all user info
+    const fetchUsers = async () => {
       try {
-        const result = await axios.request(options);
-        if (result.data) {
-          setMassiveUserData(result.data);
-          console.log("result ", result.data);
+        const result = await fetch("/api/fetchUsers");
+        const parsed = await result.json();
+
+        if (parsed) {
+          setMassiveUserData(parsed);
         }
       } catch (e) {
         console.error(e);
       }
-    })();
+    };
 
-    (async () => {
-      const options = {
-        method: "GET",
-        url: "https://kh-auth.us.auth0.com/api/v2/users",
-        params: { q: "last_login:[2022-03-02 TO 2022-03-02]" },
-        headers: {
-          authorization: `Bearer ${process.env.NEXT_PUBLIC_YOUR_MGMT_API_ACCESS_TOKEN}`,
-        },
-      };
+    fetchUsers();
 
+    const fetchTodayLogin = async () => {
       try {
-        const result = await axios.request(options);
-        if (result.data) {
-          setTodayLogins(result.data);
-          console.log("TodayLogins ", result.data);
+        const result = await fetch("/api/fetchTodayLogin");
+        const parsed = await result.json();
+
+        if (parsed) {
+          setTodayLogins(parsed);
+          console.log("TodayLogins ", parsed);
         }
       } catch (e) {
         console.error(e);
       }
-    })();
+    };
+
+    fetchTodayLogin();
   }, []);
 
+  //resend email to user
+  const handleResubmitEmail = async () => {
+    try {
+      const result = await fetch("/api/resendEmail");
+      const parsed = await result.json();
+
+      if (parsed) {
+        setMsg("Please check your email for re-validation emails");
+
+        setInterval(() => {
+          setMsg("");
+          Router.push("/profile");
+        }, 3000);
+      }
+    } catch (error) {
+      console.log("post email error ", error);
+    }
+  };
+
   return (
-    <Layout user={user} loading={loading}>
-      {loading ? (
-        <div>Loading... or you're not authenticated</div>
+    <Layout user={user} loading={isLoading}>
+      {isLoading ? (
+        <div>Loading...</div>
       ) : (
         <>
-          <h2 className="text-center pt-4">Dashboard</h2>
-          <Tabs
-            defaultActiveKey="home"
-            id="uncontrolled-tab-example"
-            className="mb-3 pt-2">
-            <Tab eventKey="home" title="Home">
-              <h2>Overall Users Stats</h2>
-              <div>Total registered user count: {massiveUserData.length}</div>
-              <div>Total Logins on today: {todayLogins.length}</div>
-
-              <h2 className="pt-3">All Users Info Tables</h2>
-              <div>
-                <Table striped bordered hover>
-                  <thead>
-                    <tr>
-                      <th>User Name</th>
-                      <th>Signed up</th>
-                      <th>Times logged in</th>
-                      <th>Last logged in</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {massiveUserData &&
-                      massiveUserData.map((user, i) => {
-                        return (
-                          <>
-                            <tr key={i}>
-                              <td>{user.name}</td>
-                              <td>{user.created_at}</td>
-                              <td>{user.logins_count}</td>
-                              <td>{user.last_login}</td>
-                              {/* <div key={i} className="row mb-4">
-                        <div>User Name: {user.name}</div>
-                        <div>Signed up: {user.created_at}</div>
-                        <div>Times logged in: {user.logins_count}</div>
-                        <div>Last logged in: {user.last_login}</div>
-                      </div> */}
-                            </tr>
-                          </>
-                        );
-                      })}
-                  </tbody>
-                </Table>
+          {user && user.email_verified === false ? (
+            <div className="row mx-0 pt-3">
+              <div className="col-12 px-0">
+                <div className="me-3">You didn't validate your email</div>
               </div>
-            </Tab>
-            <Tab eventKey="profile" title="Change Password">
-              <ChangePassword user={user} />
-            </Tab>
-          </Tabs>
+              <div className="col-12 mt-2 px-0">
+                <button
+                  className="btn btn-primary"
+                  type="button"
+                  onClick={handleResubmitEmail}>
+                  Resend Email Verification
+                </button>
+              </div>
+              {msg ? <div className="px-0 pt-2 text-primary">{msg}</div> : ""}
+            </div>
+          ) : (
+            <>
+              <h2 className="text-center pt-4">Dashboard</h2>
+              <Tabs
+                defaultActiveKey="home"
+                id="uncontrolled-tab-example"
+                className="mb-3 pt-2">
+                <Tab eventKey="home" title="Home">
+                  <h2>Overall Users Stats</h2>
+                  <div>
+                    Total registered user count: {massiveUserData.length}
+                  </div>
+                  <div>Total logins today: {todayLogins.length}</div>
+                  <h2 className="pt-3">All Users Info Tables</h2>
+                  <div>
+                    <Table striped bordered hover>
+                      <thead>
+                        <tr>
+                          <th>User Name</th>
+                          <th>Signed up</th>
+                          <th>Times logged in</th>
+                          <th>Last logged in</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {massiveUserData ? (
+                          <>
+                            {massiveUserData.map((user, i) => {
+                              return (
+                                <tr key={i}>
+                                  <td>{user.name}</td>
+                                  <td>
+                                    {moment(
+                                      new Date(user.created_at).getTime()
+                                    ).format("MMMM Do YYYY, h:mm:ss a")}
+                                  </td>
+                                  <td>{user.logins_count}</td>
+                                  <td>
+                                    {moment(
+                                      new Date(user.last_login).getTime()
+                                    ).format("MMMM Do YYYY, h:mm:ss a")}
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </>
+                        ) : (
+                          <tr>
+                            <td>null</td>
+                            <td>null</td>
+                            <td>null</td>
+                            <td>null</td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </Table>
+                  </div>
+                </Tab>
+                <Tab eventKey="profile" title="Change Password">
+                  <ChangePassword user={user} />
+                </Tab>
+              </Tabs>
+            </>
+          )}
         </>
       )}
     </Layout>
   );
 };
 
-export default Dashboard;
+export default withPageAuthRequired(Dashboard);

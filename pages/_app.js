@@ -1,8 +1,13 @@
 // import App from 'next/app'
+import { UserProvider } from "@auth0/nextjs-auth0";
 import "../styles/globale.scss";
 
 function MyApp({ Component, pageProps }) {
-  return <Component {...pageProps} />;
+  return (
+    <UserProvider user={pageProps.user}>
+      <Component {...pageProps} />
+    </UserProvider>
+  );
 }
 
 // Only uncomment this method if you have blocking data requirements for

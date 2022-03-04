@@ -25,14 +25,14 @@ const Nav = ({ user, loading }) => (
                 </a>
               </Link>
               <div className="flex-grow-1 text-end">
-                <a className="nav-link" href="/api/logout">
+                <a className="nav-link" href="/api/auth/logout">
                   Logout
                 </a>
               </div>
             </>
           ) : (
             <div className="flex-grow-1 text-end">
-              <a className="nav-link" href="/api/login">
+              <a className="nav-link" href="/api/auth/login">
                 Login
               </a>
             </div>
