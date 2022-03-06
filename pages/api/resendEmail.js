@@ -15,13 +15,13 @@ export default withApiAuthRequired(async function resendEmail(req, res) {
       const { user } = getSession(req, res);
 
       //fetch tokens
-      const access_token = await getM2MTokens();
+      const accessToken = await getM2MTokens();
 
       const resendEmailOptions = {
         method: "POST",
-        url: "https://kh-auth.us.auth0.com/api/v2/jobs/verification-email",
+        url: `${process.env.AUTH0_ISSUER_BASE_URL}/api/v2/jobs/verification-email`,
         headers: {
-          authorization: `Bearer ${access_token}`,
+          authorization: `Bearer ${accessToken}`,
           "content-type": "application/json",
         },
         data: {

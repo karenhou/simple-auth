@@ -16,14 +16,14 @@ export default withApiAuthRequired(async function changeName(req, res) {
 
     try {
       //fetch tokens
-      const access_token = await getM2MTokens();
+      const accessToken = await getM2MTokens();
 
       const chanegNameOptions = {
         method: "PATCH",
-        url: `https://kh-auth.us.auth0.com/api/v2/users/${user.sub}`,
+        url: `${process.env.AUTH0_ISSUER_BASE_URL}/api/v2/users/${user.sub}`,
         headers: {
           "content-type": "application/json",
-          authorization: `Bearer ${access_token}`,
+          authorization: `Bearer ${accessToken}`,
         },
         data: {
           name: name,

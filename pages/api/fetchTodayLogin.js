@@ -15,14 +15,14 @@ export default withApiAuthRequired(async function fetchTodayLogin(req, res) {
 
     try {
       //fetch tokens
-      const access_token = await getM2MTokens();
+      const accessToken = await getM2MTokens();
 
       const todayDate = moment(new Date()).format("YYYY-MM-DD");
       const queryUserInfoOption = {
         method: "GET",
-        url: "https://kh-auth.us.auth0.com/api/v2/users",
+        url: `${process.env.AUTH0_ISSUER_BASE_URL}/api/v2/users`,
         headers: {
-          authorization: `Bearer ${access_token}`,
+          authorization: `Bearer ${accessToken}`,
           "content-type": "application/json",
         },
         params: {
