@@ -16,7 +16,7 @@ export default withApiAuthRequired(async function fetchUser(req, res) {
 
       const getUserOptions = {
         method: "GET",
-        url: `${process.env.AUTH0_ISSUER_BASE_URL}/api/v2/users/api/v2/users`,
+        url: `${process.env.AUTH0_ISSUER_BASE_URL}/api/v2/users`,
         headers: {
           authorization: `Bearer ${accessToken}`,
           "content-type": "application/json",
