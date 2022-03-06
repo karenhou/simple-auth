@@ -81,7 +81,7 @@ const Dashboard = () => {
           {user && user.email_verified === false ? (
             <div className="row mx-0 pt-3">
               <div className="col-12 px-0">
-                <div className="me-3">You didn't validate your email</div>
+                <div className="me-3">Email not validated</div>
               </div>
               <div className="col-12 mt-2 px-0">
                 <button
