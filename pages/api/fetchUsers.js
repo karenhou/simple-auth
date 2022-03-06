@@ -7,13 +7,13 @@ export default withApiAuthRequired(async function fetchUser(req, res) {
     try {
       const fetchTokenOptions = {
         method: "POST",
-        url: process.env.NEXT_PUBLIC_AUTH0_DOMAIN + "/oauth/token",
+        url: process.env.AUTH0_ISSUER_BASE_URL + "/oauth/token",
         headers: { "content-type": "application/json" },
         data: {
           grant_type: "client_credentials",
           client_id: process.env.AUTH0_MTOM_CLIENT_ID,
           client_secret: process.env.AUTH0_MTOM_CLIENT_SECRET,
-          audience: process.env.NEXT_PUBLIC_AUTH0_DOMAIN + "/api/v2/",
+          audience: process.env.AUTH0_ISSUER_BASE_URL + "/api/v2/",
         },
       };
 
