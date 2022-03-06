@@ -7,11 +7,9 @@ import Router from "next/router";
 import { withPageAuthRequired, useUser } from "@auth0/nextjs-auth0";
 
 const checkPassword = (str) => {
-  var re = /^(?=.*\d)(?=.*[!@#$%^&*])(?=.*[a-z])(?=.*[A-Z]).{8,}$/;
+  const re = /^(?=.*\d)(?=.*[!@#$%^&*])(?=.*[a-z])(?=.*[A-Z]).{8,}$/;
   return re.test(str);
 };
-
-const axios = require("axios").default;
 
 const ChangePassword = ({ user }) => {
   const [oldPW, setOldPW] = useState("");
@@ -39,12 +37,15 @@ const ChangePassword = ({ user }) => {
     if (newPW !== passwordConfirm) {
       console.log("new not right");
       setErrorText("Confirm new password is not the same with new password");
+    } else if (newPW === oldPW) {
+      console.log("cant be the same");
+      setErrorText("Old Password is same with New Password");
     } else {
       try {
         const result = await fetch("/api/changePassword", {
           method: "PATCH",
           body: JSON.stringify({
-            password: newPW,
+            password: newPW.trim(),
           }),
         });
 
@@ -139,8 +140,17 @@ const ChangePassword = ({ user }) => {
           <div className="d-flex mt-3 mx-auto">
             <div style={{ width: "200px" }} className="text-center">
               <button
+                type="button"
                 className="btn btn-primary me-3"
-                onClick={handleSubmitChangePassword}>
+                onClick={handleSubmitChangePassword}
+                disabled={
+                  oldPW.trim() === "" ||
+                  newPW.trim() === "" ||
+                  passwordConfirm.trim() === "" ||
+                  !checkPassword(oldPW) ||
+                  !checkPassword(newPW) ||
+                  !checkPassword(passwordConfirm)
+                }>
                 Submit
               </button>
               <button className="btn btn-warning">Cancel</button>
@@ -173,7 +183,9 @@ const Dashboard = () => {
     //fetch all user info
     const fetchUsers = async () => {
       try {
-        const result = await fetch("/api/fetchUsers");
+        const result = await fetch("/api/fetchUsers", {
+          method: "GET",
+        });
         const parsed = await result.json();
 
         if (parsed) {
@@ -188,7 +200,9 @@ const Dashboard = () => {
 
     const fetchTodayLogin = async () => {
       try {
-        const result = await fetch("/api/fetchTodayLogin");
+        const result = await fetch("/api/fetchTodayLogin", {
+          method: "GET",
+        });
         const parsed = await result.json();
 
         if (parsed) {
@@ -197,6 +211,7 @@ const Dashboard = () => {
         }
       } catch (e) {
         console.error(e);
+        setTodayLogins("N/A");
       }
     };
 
@@ -206,7 +221,9 @@ const Dashboard = () => {
   //resend email to user
   const handleResubmitEmail = async () => {
     try {
-      const result = await fetch("/api/resendEmail");
+      const result = await fetch("/api/resendEmail", {
+        method: "POST",
+      });
       const parsed = await result.json();
 
       if (parsed) {
@@ -214,7 +231,6 @@ const Dashboard = () => {
 
         setInterval(() => {
           setMsg("");
-          Router.push("/profile");
         }, 3000);
       }
     } catch (error) {

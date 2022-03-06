@@ -4,6 +4,12 @@ const axios = require("axios").default;
 
 export default withApiAuthRequired(async function fetchUser(req, res) {
   return new Promise(async (resolve, reject) => {
+    if (req.method !== "GET") {
+      res.status(error.status || 500).json({
+        message: "WRONG methods passed in",
+      });
+      resolve();
+    }
     try {
       const fetchTokenOptions = {
         method: "POST",

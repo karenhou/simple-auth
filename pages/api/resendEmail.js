@@ -4,6 +4,12 @@ const axios = require("axios").default;
 
 export default withApiAuthRequired(async function resendEmail(req, res) {
   return new Promise(async (resolve, reject) => {
+    if (req.method !== "POST") {
+      res.status(error.status || 500).json({
+        message: "WRONG methods passed in",
+      });
+      resolve();
+    }
     try {
       const { user } = getSession(req, res);
 
@@ -35,7 +41,6 @@ export default withApiAuthRequired(async function resendEmail(req, res) {
       };
 
       const resendEmailResult = await axios.request(resendEmailOptions);
-      console.log("resendEmailResult ", resendEmailResult);
       res.status(200).json(resendEmailResult.data);
       resolve();
     } catch (error) {

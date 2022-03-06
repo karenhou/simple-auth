@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Layout from "../components/layout/layout";
 import { useUser, withPageAuthRequired } from "@auth0/nextjs-auth0";
 
@@ -15,11 +15,9 @@ const Profile = () => {
         method: "PATCH",
         body: JSON.stringify({
           name: inputName,
-          user: user,
         }),
       });
       const parsed = await result.json();
-      console.log("result ", parsed);
 
       if (parsed) {
         setSubmitSuccess(
@@ -72,17 +70,20 @@ const Profile = () => {
                       style={{ width: "100px" }}
                       type="button"
                       className="btn btn-primary"
-                      onClick={handleSetUserName}>
+                      onClick={handleSetUserName}
+                      disabled={inputName.trim().length === 0}>
                       Update
                     </button>
                   </div>
                   {errorText ? (
-                    <div className="d-flex text-danger">{errorText}</div>
+                    <div className="d-flex text-danger pt-2">{errorText}</div>
                   ) : (
                     ""
                   )}
                   {submitSuccess ? (
-                    <div className="d-flex text-primary">{submitSuccess}</div>
+                    <div className="d-flex text-primary pt-2">
+                      {submitSuccess}
+                    </div>
                   ) : (
                     ""
                   )}

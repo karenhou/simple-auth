@@ -4,11 +4,18 @@ const axios = require("axios").default;
 
 export default withApiAuthRequired(async function changeName(req, res) {
   return new Promise(async (resolve, reject) => {
-    const { user } = getSession(req, res);
+    if (req.method !== "PATCH") {
+      res.status(error.status || 500).json({
+        message: "WRONG methods passed in",
+      });
+      resolve();
+    }
 
+    const { user } = getSession(req, res);
     const { name } = JSON.parse(req.body);
 
     try {
+      //fetch tokens
       const fetchTokenOptions = {
         method: "POST",
         url: process.env.AUTH0_ISSUER_BASE_URL + "/oauth/token",
@@ -38,7 +45,6 @@ export default withApiAuthRequired(async function changeName(req, res) {
       };
 
       const results = await axios.request(chanegNameOptions);
-      console.log("results ", results);
       res.status(results.status || 200).json(results.data);
       resolve();
     } catch (error) {

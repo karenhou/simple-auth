@@ -4,9 +4,14 @@ const axios = require("axios").default;
 
 export default withApiAuthRequired(async function changePassword(req, res) {
   return new Promise(async (resolve, reject) => {
-    const { user } = getSession(req, res);
+    if (req.method !== "PATCH") {
+      res.status(error.status || 500).json({
+        message: "WRONG methods passed in",
+      });
+      resolve();
+    }
 
-    console.log("req ofhosdf ", req.body);
+    const { user } = getSession(req, res);
     const { password } = JSON.parse(req.body);
 
     try {
@@ -38,10 +43,8 @@ export default withApiAuthRequired(async function changePassword(req, res) {
           connection: "Username-Password-Authentication",
         },
       };
-      console.log("chanegNameOptions ", chanegNameOptions);
 
       const results = await axios.request(chanegNameOptions);
-      console.log("results ", results);
       res.status(results.status || 200).json(results.data);
       resolve();
     } catch (error) {
